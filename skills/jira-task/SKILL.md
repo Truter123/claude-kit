@@ -1,0 +1,169 @@
+---
+name: jira-task
+description: 'Explain how to create a good Jira ticket and walk the user through doing it: which field goes where in the Create dialog, a paste-ready description template per issue type (task, story, bug, spike), how to write acceptance criteria that are actually testable, and a quality gate to check before hitting Create. Use whenever the user mentions writing, creating, or improving a Jira ticket, issue, task, story, bug, or asks what to put in a ticket.'
+license: MIT
+metadata:
+  tags: "Jira, Tickets, Acceptance Criteria, ADHD, Agile, How-To"
+  category: "workflow"
+---
+
+# jira-task
+
+Teach the user how to create a ticket, and hand them something they can paste. Not a lecture — a filled-in draft plus the reason each part is there.
+
+A ticket fails for four reasons: the assignee cannot tell why the work matters, nobody can tell when it is done, a required field blocks the Create button, or the body is a wall of prose so starting costs more than doing.
+
+## How to behave
+
+- **Draft first, explain second.** Show the filled-in ticket for their actual task, then a short "why each section" note. Never explain in the abstract when you have a real example in front of you.
+- **One question maximum, at the end.** Make the reasonable call on every gap, list your assumptions under the draft, let them correct in one reply.
+- **Give them the paste.** The description block goes in a fenced code block, ready to copy into Jira.
+- **No status narration.** Do not say what you are about to do. Show the draft.
+
+## The Create dialog, field by field
+
+In Jira: **Create** button (or `c`) → then, top to bottom:
+
+1. **Project** — where the work lives. If unsure, the project the code or team belongs to, not the one that reported it.
+2. **Issue type** — `Task` (work to do), `Story` (user-visible value), `Bug` (something is broken), `Spike` (a question to answer). Pick by what "done" looks like, not by size.
+3. **Summary** — 5–9 words, states the change, findable in a backlog of 200. No `[FEAT]` / `[NEW]` prefixes; the issue type field already says that.
+   - Bad: `Fix the thing on the dashboard`
+   - Good: `Dashboard filter drops results after date-range change`
+4. **Description** — the templates below.
+5. **Priority / Components / Labels** — pick from the project's existing values. Never invent a near-duplicate label (`ux-research` vs `ux_research`); components drive the team's reporting, so pick, do not create.
+6. **Parent / Epic link** — the umbrella this belongs under. Prefer a peer ticket plus a link (`relates to`, `blocks`) over a subtask, unless the team clearly uses subtasks.
+7. **Assignee** — leave empty if it goes through refinement. Assigning early quietly skips the team's triage.
+8. **Sprint / Story points** — usually set at refinement, not at creation. Leave them.
+
+If Create is greyed out or errors, a required field is empty — the error names it. Jira projects each have their own required fields; there is no universal list.
+
+## Description templates
+
+Paste one, fill the brackets, delete what does not apply.
+
+**Task**
+
+```
+h3. First step
+[One concrete action to start: a path, endpoint, page, or command.
+ e.g. Open src/api/orders.ts and read buildQuery()]
+
+h3. Context
+[Why this is on the board — what breaks or what is gained. 2-3 sentences.]
+
+h3. The work
+[What to do, plain language.]
+
+h3. Acceptance criteria
+* [ ] [True/false statement]
+* [ ] [True/false statement]
+
+h3. Out of scope
+* [Adjacent thing a reader would assume is included and is not]
+```
+
+**Story** — same, but "The work" becomes:
+
+```
+h3. Story
+When [situation], I want [capability], so that [outcome].
+```
+
+Job-story framing beats "As a <persona>" unless the persona actually changes the behaviour. Add `h3. Design` (link or TBD) and `h3. Technical considerations` — keep both *outside* acceptance criteria, so AC stays stable while the approach evolves.
+
+**Bug** — repro steps come first, context drops to one line:
+
+```
+h3. Summary
+[What is wrong and who it hits.]
+
+h3. Steps to reproduce
+# [Start from a named state — logged in as X, on page Y]
+# [One action per step, no "and then"]
+
+h3. Expected
+h3. Actual
+[Verbatim error text if there is one.]
+
+h3. Environment
+Version / build, browser / OS, URL, account.
+No credentials, no tokens, no customer personal data — write [redacted].
+
+h3. Impact
+[Frequency, workaround, does it block release? This is what drives priority.]
+```
+
+**Spike** — a spike is done when a question is answered, not when code works:
+
+```
+h3. Question       [the single decision this unblocks]
+h3. Timebox        [e.g. 2 days — a spike without a timebox is a project]
+h3. Done when
+* [ ] The question is answered in writing at [where]
+* [ ] A recommendation exists with the trade-offs named
+* [ ] Follow-up tickets created, or explicitly not needed
+```
+
+In the modern Jira editor you can paste markdown headings and lists directly and it converts. `h3.` is the wiki-markup fallback if it does not.
+
+## Acceptance criteria: the part people get wrong
+
+Every line must be **true or false with no argument**. Use `Given / When / Then` when a flow or edge case matters, plain checkboxes otherwise. If a line cannot be phrased as testable, it is context — move it up into Context.
+
+Rewrite these on sight:
+
+- "Works on mobile" → "Renders without horizontal scroll at 375px width"
+- "Is fast" → "Search returns in under 500ms p95 with 10k rows"
+- "Handles errors" → "On a 500 from /orders, shows the retry banner and logs the request id"
+- "User can log in" → "Given a valid magic link, when opened within 15 minutes, then the user lands on /dashboard authenticated"
+
+## Keep it readable
+
+1. **Under 300 words.** Longer means the work should be split — say so, offer to split, do not split unasked.
+2. **Nothing important in prose.** Headings, bullets, checkboxes, numbered steps. A paragraph over four lines gets cut or converted.
+3. **One bounded action per numbered step.** Never two "and then"s in a line.
+4. **Cap every list at five.** Past five, split into must / nice-to-have.
+5. **Concrete over vague, always.** `src/auth.ts:42`, `p95 under 300ms` — never "the auth code", never "fast".
+6. **Open questions get their own line**, prefixed `OPEN:`. Never buried mid-sentence.
+
+## Check before hitting Create
+
+1. Someone outside the conversation can tell why the work matters.
+2. The first step is concrete enough to start in under a minute.
+3. Every acceptance criterion is true or false.
+4. Nothing in the body is a guess presented as a fact.
+5. It fits in one sprint.
+
+## Filing through the MCP tool: formatting that actually survives
+
+`createJiraIssue` / `editJiraIssue` with `contentFormat: "markdown"` runs the body through a
+markdown-to-ADF converter. Three things bite, all verified against a real project:
+
+1. **Links must be markdown, not wiki markup.** `[text](https://url)` works. `[text|https://url]`
+   is wiki syntax; the converter escapes the brackets and the reader sees literal characters.
+   Check the returned `description` in the tool result — if you see `\[` in it, it did not convert.
+2. **Checkbox lists do not survive.** `- [ ]` and `* [ ]` both come back as `* \[ \]` — a plain
+   bullet with escaped brackets, never an ADF `taskList`. So either accept plain bullets for
+   acceptance criteria, or pass `contentFormat: "adf"` with a real `taskList` node. Do not keep
+   sending `[ ]` and hoping; it renders as noise.
+3. **Tables, headings, bold, inline code and fenced blocks all convert fine.** Prefer a small
+   table over a bullet list when mapping columns to fields.
+
+Always read the `description` that comes back in the response rather than assuming the write
+landed as intended. It is the cheapest possible check and it catches all of the above.
+
+## Assignee: the board filter nobody remembers
+
+An issue created with no assignee will not appear on a board URL that filters by assignee
+(`.../boards/620?assignee=<accountId>`), so the reporter files five tickets and sees none of them.
+This contradicts the general advice above to leave the assignee empty for refinement: when the
+person is filing work for themselves and wants it on their own board, set `assignee` to their
+`accountId`. The reporter's own `accountId` is in the create/edit response under `fields.reporter`.
+
+If tickets still do not show up after assigning, the board may be scoped to a sprint — a new
+issue lands in the backlog and has to be pulled into the active sprint. Say that rather than
+re-filing.
+
+## If a Jira tool is connected
+
+If this session has Jira MCP tools (`mcp__*jira*`, `mcp__*atlassian*`) or `JIRA_URL` + `JIRA_EMAIL` + `JIRA_API_TOKEN` are set, offer to file it after the draft is approved — read the project's create metadata for required fields and allowed values first, then create and report the key and browse URL. Otherwise hand over the paste-ready block and say where it goes. Never invent an issue key or a Jira URL.

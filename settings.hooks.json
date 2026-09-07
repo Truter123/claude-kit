@@ -1,0 +1,59 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -Rs '{hookSpecificOutput:{hookEventName:\"SessionStart\",additionalContext:.}}' $HOME/.claude/rules/adhd.md",
+            "statusMessage": "Loading ADHD output rules"
+          },
+          {
+            "type": "command",
+            "command": "bash $HOME/.claude/hooks/cg-sync.sh \"$PWD\"",
+            "statusMessage": "code-navigator: refreshing index (sync; init on first run or after deletes/renames)",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ \"$PWD\" != \"$HOME\" ] && [ -f \"$PWD/navigators/code/code-navigator.db\" ] && java -jar \"${CODE_NAVIGATOR_JAR:-$HOME/Documents/Tools/code-navigator/jars/code-navigator.jar}\" mark-dirty \"$PWD\"; true",
+            "statusMessage": "code-navigator: marking index dirty",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ \"$PWD\" != \"$HOME\" ] && [ -f \"$PWD/navigators/code/.dirty\" ] && timeout 600 java -jar \"${CODE_NAVIGATOR_JAR:-$HOME/Documents/Tools/code-navigator/jars/code-navigator.jar}\" sync-if-dirty \"$PWD\"; true",
+            "statusMessage": "code-navigator: syncing index",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $HOME/.claude/hooks/agent-guard.sh",
+            "statusMessage": "capability graph: checking spawn"
+          }
+        ]
+      }
+    ]
+  }
+}
