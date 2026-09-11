@@ -1,6 +1,6 @@
 ---
 name: jira-task
-description: 'Explain how to create a good Jira ticket and walk the user through doing it: which field goes where in the Create dialog, a paste-ready description template per issue type (task, story, bug, spike), how to write acceptance criteria that are actually testable, and a quality gate to check before hitting Create. Use whenever the user mentions writing, creating, or improving a Jira ticket, issue, task, story, bug, or asks what to put in a ticket.'
+description: 'Explain how to create a good Jira ticket and walk the user through doing it: which field goes where in the Create dialog, a paste-ready description template per issue type (task, story, bug, spike), how to write acceptance criteria that are actually testable, and a quality gate to check before hitting Create. Use whenever the user mentions writing, creating, filing or improving a Jira ticket, issue, task, story, bug, spike, epic or subtask, asks what to put in a ticket, asks for acceptance criteria, or says "załóż taska", "zrób ticket", "opisz to w Jirze" - even when Jira is not named but the output is clearly a backlog item.'
 license: MIT
 metadata:
   tags: "Jira, Tickets, Acceptance Criteria, ADHD, Agile, How-To"
@@ -26,7 +26,7 @@ In Jira: **Create** button (or `c`) → then, top to bottom:
 
 1. **Project** — where the work lives. If unsure, the project the code or team belongs to, not the one that reported it.
 2. **Issue type** — `Task` (work to do), `Story` (user-visible value), `Bug` (something is broken), `Spike` (a question to answer). Pick by what "done" looks like, not by size.
-3. **Summary** — 5–9 words, states the change, findable in a backlog of 200. No `[FEAT]` / `[NEW]` prefixes; the issue type field already says that.
+3. **Summary** — 5–9 words, states the change, findable in a backlog of 200. No `[FEAT]` / `[NEW]` prefixes; the issue type field already says that. The exception is a prefix the project already uses on every ticket, such as `[BE]` / `[FE]` for a split backlog — match the neighbours, never invent one.
    - Bad: `Fix the thing on the dashboard`
    - Good: `Dashboard filter drops results after date-range change`
 4. **Description** — the templates below.
@@ -44,67 +44,67 @@ Paste one, fill the brackets, delete what does not apply.
 **Task**
 
 ```
-h3. First step
+### First step
 [One concrete action to start: a path, endpoint, page, or command.
  e.g. Open src/api/orders.ts and read buildQuery()]
 
-h3. Context
+### Context
 [Why this is on the board — what breaks or what is gained. 2-3 sentences.]
 
-h3. The work
+### The work
 [What to do, plain language.]
 
-h3. Acceptance criteria
+### Acceptance criteria
 * [ ] [True/false statement]
 * [ ] [True/false statement]
 
-h3. Out of scope
+### Out of scope
 * [Adjacent thing a reader would assume is included and is not]
 ```
 
 **Story** — same, but "The work" becomes:
 
 ```
-h3. Story
+### Story
 When [situation], I want [capability], so that [outcome].
 ```
 
-Job-story framing beats "As a <persona>" unless the persona actually changes the behaviour. Add `h3. Design` (link or TBD) and `h3. Technical considerations` — keep both *outside* acceptance criteria, so AC stays stable while the approach evolves.
+Job-story framing beats "As a <persona>" unless the persona actually changes the behaviour. Add `### Design` (link or TBD) and `### Technical considerations` — keep both *outside* acceptance criteria, so AC stays stable while the approach evolves.
 
 **Bug** — repro steps come first, context drops to one line:
 
 ```
-h3. Summary
+### Summary
 [What is wrong and who it hits.]
 
-h3. Steps to reproduce
+### Steps to reproduce
 # [Start from a named state — logged in as X, on page Y]
 # [One action per step, no "and then"]
 
-h3. Expected
-h3. Actual
+### Expected
+### Actual
 [Verbatim error text if there is one.]
 
-h3. Environment
+### Environment
 Version / build, browser / OS, URL, account.
 No credentials, no tokens, no customer personal data — write [redacted].
 
-h3. Impact
+### Impact
 [Frequency, workaround, does it block release? This is what drives priority.]
 ```
 
 **Spike** — a spike is done when a question is answered, not when code works:
 
 ```
-h3. Question       [the single decision this unblocks]
-h3. Timebox        [e.g. 2 days — a spike without a timebox is a project]
-h3. Done when
+### Question       [the single decision this unblocks]
+### Timebox        [e.g. 2 days — a spike without a timebox is a project]
+### Done when
 * [ ] The question is answered in writing at [where]
 * [ ] A recommendation exists with the trade-offs named
 * [ ] Follow-up tickets created, or explicitly not needed
 ```
 
-In the modern Jira editor you can paste markdown headings and lists directly and it converts. `h3.` is the wiki-markup fallback if it does not.
+These are markdown, which is what both the Jira editor and the MCP tool want. If you are pasting by hand into an old wiki-markup project, swap `###` for `h3.` — but never send wiki markup through the MCP tool (see below).
 
 ## Acceptance criteria: the part people get wrong
 
@@ -134,36 +134,24 @@ Rewrite these on sight:
 4. Nothing in the body is a guess presented as a fact.
 5. It fits in one sprint.
 
-## Filing through the MCP tool: formatting that actually survives
-
-`createJiraIssue` / `editJiraIssue` with `contentFormat: "markdown"` runs the body through a
-markdown-to-ADF converter. Three things bite, all verified against a real project:
-
-1. **Links must be markdown, not wiki markup.** `[text](https://url)` works. `[text|https://url]`
-   is wiki syntax; the converter escapes the brackets and the reader sees literal characters.
-   Check the returned `description` in the tool result — if you see `\[` in it, it did not convert.
-2. **Checkbox lists do not survive.** `- [ ]` and `* [ ]` both come back as `* \[ \]` — a plain
-   bullet with escaped brackets, never an ADF `taskList`. So either accept plain bullets for
-   acceptance criteria, or pass `contentFormat: "adf"` with a real `taskList` node. Do not keep
-   sending `[ ]` and hoping; it renders as noise.
-3. **Tables, headings, bold, inline code and fenced blocks all convert fine.** Prefer a small
-   table over a bullet list when mapping columns to fields.
-
-Always read the `description` that comes back in the response rather than assuming the write
-landed as intended. It is the cheapest possible check and it catches all of the above.
-
-## Assignee: the board filter nobody remembers
-
-An issue created with no assignee will not appear on a board URL that filters by assignee
-(`.../boards/620?assignee=<accountId>`), so the reporter files five tickets and sees none of them.
-This contradicts the general advice above to leave the assignee empty for refinement: when the
-person is filing work for themselves and wants it on their own board, set `assignee` to their
-`accountId`. The reporter's own `accountId` is in the create/edit response under `fields.reporter`.
-
-If tickets still do not show up after assigning, the board may be scoped to a sprint — a new
-issue lands in the backlog and has to be pulled into the active sprint. Say that rather than
-re-filing.
-
 ## If a Jira tool is connected
 
 If this session has Jira MCP tools (`mcp__*jira*`, `mcp__*atlassian*`) or `JIRA_URL` + `JIRA_EMAIL` + `JIRA_API_TOKEN` are set, offer to file it after the draft is approved — read the project's create metadata for required fields and allowed values first, then create and report the key and browse URL. Otherwise hand over the paste-ready block and say where it goes. Never invent an issue key or a Jira URL.
+
+**Copy the field set from a sibling ticket, not from create metadata.** Create metadata lists only
+what is *required*. A project's market, program, product-line and cost-code custom fields are
+usually optional, so they never appear there — and a ticket without them drops out of the filters
+the team actually reads. Before creating, `getJiraIssue` a recent ticket from the same project with
+`fields: ["*all"]`, and carry over every non-null `customfield_*`, plus `components` and `priority`.
+The field ids are per-project and not guessable; read them, do not remember them.
+
+**File a pair as a pair.** When the work splits across two tickets (backend and frontend, service
+and client), create both, then link them with `createIssueLink` using the link type the project's
+existing pairs use — check a sibling's `issuelinks` rather than assuming `Blocks`. A dependency
+written only in the description text is invisible on the board.
+
+Before the first `createJiraIssue` / `editJiraIssue` call, read `references/mcp-formatting.md` in
+this skill's directory. It holds the markdown-to-ADF traps (checkboxes and wiki links do not
+survive, `renderedFields` lies) and the assignee/board-filter rule. They are verified against a real
+project and they are not guessable, so a ticket filed without reading them shows literal `\[ \]` to
+the reader.

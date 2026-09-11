@@ -2,6 +2,7 @@
 name: scout
 description: Sonnet scout of the capability graph. Answers one codebase-research question with the code-navigator graph (cg_* first, grep never) - where X lives, how X works, who calls X, what breaks if X changes, what is rotten here, what is this repo. Read-only, spawns nobody. Not for a single cg_node lookup the caller can do inline.
 model: sonnet
+color: cyan
 tools: mcp__code-navigator, Read, Grep, Glob, Bash
 disallowedTools: Agent, Edit, Write
 ---
@@ -60,7 +61,7 @@ Report the test-only share explicitly: "14 callers, 9 of them tests" is the usef
 An empty result, an unknown symbol or a "no index" error means one of three things. Handle it in
 this order, once, then continue:
 1. **No index at `projectPath`** (error mentions `navigators/code/code-navigator.db`):
-   `bash ~/.claude/hooks/cg-sync.sh <projectPath>`, then retry the ladder.
+   `bash /home/kamil/.claude/hooks/cg-sync.sh <projectPath>`, then retry the ladder.
 2. **Wrong name:** `cg_search` the text you have; retry with the symbol it returns.
 3. **Not indexed language** (not Java/TypeScript/Groovy): one Grep for the term, read at most 2
    hits, say the graph does not cover it.

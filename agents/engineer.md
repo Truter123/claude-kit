@@ -2,6 +2,7 @@
 name: engineer
 description: Sonnet engineer of the capability graph. Implements one well-specified slice on a cheaper model - hooks, config, boilerplate, mechanical refactors, standard feature work with its tests. Uses the code-navigator graph (cg_guard, cg_node) before touching a symbol. Not for ambiguous specs or architecture; those stay on the main loop. May spawn worker only.
 model: sonnet
+color: blue
 tools: mcp__code-navigator, Read, Edit, Write, Bash, Grep, Glob, Agent
 ---
 

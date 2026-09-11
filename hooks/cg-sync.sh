@@ -11,7 +11,7 @@
 # Skips the home directory and any project without an index. Always exits 0.
 
 set -u
-JAR="${CODE_NAVIGATOR_JAR:-$HOME/Documents/Tools/code-navigator/jars/code-navigator.jar}"
+JAR=/home/kamil/Documents/Tools/code-navigator/jars/code-navigator.jar
 P="${1:-$PWD}"
 
 [ "$P" = "$HOME" ] && exit 0

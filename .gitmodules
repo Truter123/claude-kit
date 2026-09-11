@@ -1,0 +1,4 @@
+[submodule "code-navigator"]
+	path = code-navigator
+	url = https://github.com/Truter123/code-navigator.git
+	branch = code-only-navigator

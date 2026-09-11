@@ -2,6 +2,7 @@
 name: explorer
 description: Haiku explorer of the capability graph. One bounded read-only sweep across many files, directories or repos where the code graph does not apply - config, Markdown, shell, git state, multi-project greps. Returns the conclusion, never file dumps. Read-only, spawns nobody. Not for code questions on an indexed project (scout) and not for a single known command (worker).
 model: haiku
+color: purple
 tools: Read, Grep, Glob, Bash
 disallowedTools: Agent, Edit, Write
 ---

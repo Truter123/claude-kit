@@ -43,6 +43,16 @@
         ]
       }
     ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $HOME/.claude/hooks/agent-registry.sh"
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Agent",
@@ -51,6 +61,27 @@
             "type": "command",
             "command": "bash $HOME/.claude/hooks/agent-guard.sh",
             "statusMessage": "capability graph: checking spawn"
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $HOME/.claude/hooks/agent-registry.sh",
+            "statusMessage": "capability graph: registering subagent model"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $HOME/.claude/hooks/agent-registry.sh"
           }
         ]
       }

@@ -2,6 +2,7 @@
 name: worker
 description: Haiku worker of the capability graph. One fully specified mechanical action - an exact old→new edit in one file, a config/JSON key change, one named command and its output, a grep sweep for a given pattern, verifying a step by running its check command. Never a judgment call. Spawns nobody.
 model: haiku
+color: yellow
 tools: Read, Edit, Write, Bash, Grep, Glob
 disallowedTools: Agent
 ---
