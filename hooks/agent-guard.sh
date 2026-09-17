@@ -9,7 +9,7 @@
 # SubagentStart binds it to the agent_id. An unregistered agent_id is assumed to be opus.
 # Exit 2 + stderr blocks the call and shows the reason. Always exits 2 on unparsable input.
 set -u
-SETTINGS=/home/kamil/.claude/settings.json
+SETTINGS="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/settings.json"
 
 deny() { echo "capability graph: $1" >&2; exit 2; }
 
@@ -22,7 +22,7 @@ SUBTYPE=$(printf '%s' "$INPUT" | jq -r '.tool_input.subagent_type // ""' 2>/dev/
 MODEL=$(printf '%s' "$INPUT" | jq -r '.tool_input.model // ""' 2>/dev/null) || deny "guard could not parse input"
 
 # A custom agent with model: pinned in its frontmatter needs no model in the call.
-AGENT_FILE="/home/kamil/.claude/agents/$SUBTYPE.md"
+AGENT_FILE="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/agents/$SUBTYPE.md"
 if [ -z "$MODEL" ] && [ -n "$SUBTYPE" ] && [ -f "$AGENT_FILE" ]; then
   MODEL=$(sed -n 's/^model:[[:space:]]*//p' "$AGENT_FILE" | head -1)
 fi

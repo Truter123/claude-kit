@@ -1,2 +1,4 @@
 navigators/
 *.db
+.idea/
+.mcp.json

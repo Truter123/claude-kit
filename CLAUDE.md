@@ -9,15 +9,12 @@ a custom agent whose frontmatter pins it; a bare call, an upward call or a peer 
 | Rung | Does | Agent | May spawn |
 |---|---|---|---|
 | `fable` | advisor only: architecture, security review, final judge; reads, returns advice, spawns nothing | `/advisor` | — |
-| `opus` | the main loop: plan, integrate, decide | (this session) | `engineer`, `scout`, `worker`, `explorer`, `surfer`, `lurker` |
-| `sonnet` | one implementation slice with tests (`engineer`); one research question, graph-first, read-only (`scout`); one outside-world question with a source on every claim, read-only (`surfer` Brave web, `lurker` Reddit) | `agents/engineer.md`, `agents/scout.md`, `agents/surfer.md`, `agents/lurker.md` | `engineer` → `worker`; `scout`, `surfer`, `lurker` → nobody |
+| `opus` | the main loop: plan, integrate, decide | (this session) | `engineer`, `scout`, `worker`, `explorer` |
+| `sonnet` | one implementation slice with tests (`engineer`); one research question, graph-first, read-only (`scout`) | `agents/engineer.md`, `agents/scout.md` | `engineer` → `worker`; `scout` → nobody |
 | `haiku` | one mechanical edit or one command (`worker`); one bounded read-only sweep across files, dirs or repos where the graph does not apply (`explorer`) | `agents/worker.md`, `agents/explorer.md` | nobody (no `Agent` tool) |
 
 - Down only: a change → `engineer`; code research on the graph → `scout`; a file/git sweep off the
-  graph → `explorer`; one mechanical action → `worker`; an outside-world question → `/research`,
-  which fans out to `surfer` and `lurker` (the main loop never calls the search tools itself); "what
-  should I refactor" on a project → `/smell-java`, which ranks graph hotspots through `scout`.
-  Built-in `Explore` is not used; built-in
+  graph → `explorer`; one mechanical action → `worker`. Built-in `Explore` is not used; built-in
   `Plan` only with `model: "sonnet"`. A fork inherits the caller and is allowed from the main loop
   only.
 - Up one rung: a subagent that needs a decision reports `blocked` with one question, never spawns
@@ -45,7 +42,7 @@ delegate to `scout` with `projectPath` and the question. Every rung uses the gra
 for one inline call, `scout` for the ladders, `engineer` for `cg_guard` before an edit; on an
 indexed project grep-and-read is never the first move. Never grep-and-read here. No graph
 (`navigators/code/code-navigator.db` missing) → `bash ~/.claude/hooks/cg-sync.sh "$PWD"` once. The
-graph indexes Java, TypeScript, Groovy and Dart only; ADRs, business rules and the glossary live in the
+graph indexes Java, TypeScript, Groovy, Dart, Python, SQL and shell; ADRs, business rules and the glossary live in the
 repo's `CLAUDE.md`, `CONTEXT.md` and `adr/` — say so when the answer came from there. Skip for a
 trivial lookup with a known file and for non-code questions.
 

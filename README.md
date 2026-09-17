@@ -1,6 +1,6 @@
 # claude-kit
 
-My Claude Code setup: six delegation agents, six skills, the hooks that enforce the delegation
+My Claude Code setup: four delegation agents, five skills, the hooks that enforce the delegation
 order, and the [code-navigator](https://github.com/Truter123/code-navigator) code graph as a
 submodule. Copy it into `~/.claude` on any machine.
 
@@ -9,14 +9,14 @@ submodule. Copy it into `~/.claude` on any machine.
 | Path | What it is |
 |---|---|
 | `CLAUDE.md` | Global instructions: the capability graph (fable > opus > sonnet > haiku), code questions through the graph, project documents. |
-| `agents/` | `engineer` (sonnet, implements one slice), `scout` (sonnet, read-only research on the graph), `surfer` (sonnet, one web question via Brave), `lurker` (sonnet, one Reddit question), `worker` (haiku, one mechanical action), `explorer` (haiku, read-only sweep off the graph). Each has a `color:` for the status line. |
-| `skills/` | `refresh-docs` (regenerates `docs/domain/*.md` from the graph), `smell-java` (ranks refactoring candidates by graph blast radius), `research` (fans out to `surfer` + `lurker`), `commit` (one-commit-per-branch style), `jira-task` (how to write a good Jira ticket), `skill-creator` (build and eval skills). |
+| `agents/` | `engineer` (sonnet, implements one slice), `scout` (sonnet, read-only research on the graph), `worker` (haiku, one mechanical action), `explorer` (haiku, read-only sweep off the graph). Each has a `color:` for the status line. |
+| `skills/` | `refresh-docs` (regenerates `docs/domain/*.md` from the graph), `project-sweep` (one broad multi-angle read of a codebase), `distill` (clusters your recurring prompts from `history.jsonl`), `skill-creator` (build and eval skills), `agent-eval-cases` (decide which agent behaviours deserve an eval case, then write them; vendored from agentailor/skills, MIT). No skill here calls the network. |
 | `hooks/` | `agent-guard.sh` (PreToolUse on `Agent`: blocks bare, upward and peer spawns), `agent-registry.sh` (SubagentStart/Stop: binds each subagent to its model so the guard sees peers), `cg-sync.sh` (SessionStart: builds or refreshes a project's code graph). |
 | `code-navigator/` | Git submodule: the code-graph MCP server (Java). Branch `code-only-navigator`. |
 | `rules/adhd.md` | Output rules loaded into every session by the SessionStart hook. |
 | `settings.hooks.json` | The `hooks` block to merge into `~/.claude/settings.json`. |
 | `mcp.json.example` | The `code-navigator` MCP server entry. `cg-sync.sh` writes this into each project's `.mcp.json` for you. |
-| `adr/` | Why things are the way they are (ADR 0001–0010). |
+| `adr/` | Why things are the way they are (ADR 0003–0012; 0001, 0002, 0008 and 0009 withdrawn - this kit ships no external search). |
 
 ## Install
 
@@ -53,13 +53,16 @@ echo '{"tool_name":"Agent","tool_input":{"prompt":"x","subagent_type":"worker"}}
 ```
 
 Start `claude` in an indexed project: the session opens with the ADHD rules loaded and the
-`cg_*` tools available. The graph indexes Java, TypeScript, Groovy and Dart only.
+`cg_*` tools available. The graph indexes Java, TypeScript, Groovy, Dart, Python, SQL and shell.
 
 ## How the delegation works
 
 Work goes down one rung, questions go up one rung. The main session (opus) plans and integrates;
 `engineer` implements one slice with tests; `scout` answers one code question on the graph;
-`surfer` and `lurker` answer one outside-world question each (web, Reddit); `explorer` does one
-read-only sweep where the graph does not apply; `worker` does one mechanical edit or command.
+`explorer` does one read-only sweep where the graph does not apply; `worker` does one mechanical
+edit or command.
 `hooks/agent-guard.sh` rejects any `Agent` call that does not name a model or that points upward
 or sideways. Details and the reasons are in `CLAUDE.md` and `adr/`.
+
+No agent has the `Skill` tool: every agent's frontmatter lists its tools explicitly, so a subagent
+cannot invoke a skill and the skills stay a main-loop concern.

@@ -11,7 +11,7 @@
 # Skips the home directory and any project without an index. Always exits 0.
 
 set -u
-JAR=/home/kamil/Documents/Tools/code-navigator/jars/code-navigator.jar
+JAR="${CODE_NAVIGATOR_JAR:-$HOME/Documents/Tools/code-navigator/jars/code-navigator.jar}"
 P="${1:-$PWD}"
 
 [ "$P" = "$HOME" ] && exit 0
@@ -53,7 +53,7 @@ ensure_excluded() {
 }
 
 if [ ! -f "$DB" ]; then
-  git -C "$P" ls-files | grep -qE '\.(java|ts|groovy)$' || exit 0
+  git -C "$P" ls-files | grep -qE '\.(java|ts|groovy|dart|py|sql|sh)$' || exit 0
   mode=init
   echo "cg-sync: first-time init $P"
 else
@@ -63,7 +63,7 @@ else
       last=$(cat "$STAMP")
       if [ "$last" != "$head" ] && git -C "$P" cat-file -e "$last" 2>/dev/null; then
         if git -C "$P" diff --name-status --diff-filter=DR "$last" "$head" \
-           | grep -qE '\.(java|ts|groovy)$'; then
+           | grep -qE '\.(java|ts|groovy|dart|py|sql|sh)$'; then
           mode=init
         fi
       fi

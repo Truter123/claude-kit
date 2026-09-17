@@ -28,7 +28,7 @@ Two hooks share one registry under `${TMPDIR:-/tmp}/claude-agent-guard-<uid>/<se
   for its `agent_type`, else to the agent file's frontmatter model, else opus. On `SubagentStop`
   it deletes the binding; on `SessionEnd` it deletes the session directory. It never blocks.
 
-No other rung, agent file or skill changes. The "exactly six agents" rule of ADR 0007/0008 holds.
+No other rung, agent file or skill changes. The "exactly four agents" rule of ADR 0007 holds.
 
 ## Consequences
 A sonnet subagent may now spawn haiku only; a haiku subagent (a `general-purpose` call with
